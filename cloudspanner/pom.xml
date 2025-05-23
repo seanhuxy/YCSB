@@ -59,6 +59,18 @@ LICENSE file.
       <artifactId>perfmark-traceviewer</artifactId>
       <version>0.23.0</version>
     </dependency>
+    <dependency>
+      <groupId>spanner</groupId>
+      <artifactId>jni</artifactId>
+      <version>0.1</version>
+      <scope>system</scope>
+      <systemPath>${project.basedir}/libs/jbox-prober-1.0-all.jar</systemPath>
+    </dependency>
+    <dependency>
+      <groupId>com.google.protobuf</groupId>
+      <artifactId>protobuf-java</artifactId>
+      <version>4.30.2</version>
+    </dependency>
 
   </dependencies>
   <build>

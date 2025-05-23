@@ -228,7 +228,9 @@ public class CloudSpannerClient extends DB {
         if (project == null) {
           project = spanner.getOptions().getProjectId();
         }
-        dbClient = spanner.getDatabaseClient(DatabaseId.of(project, instance, database));
+        // dbClient = spanner.getDatabaseClient(DatabaseId.of(project, instance, database));
+        dbClient = new experimental.users.romaroma.boxjni.SpannerJNI(
+            DatabaseId.of(project, instance, database).toString());
       } catch (Exception e) {
         LOGGER.log(Level.SEVERE, "init()", e);
         throw new DBException(e);
