@@ -111,6 +111,10 @@ public class CloudSpannerClient extends DB {
      * Connect to Experimental host instead of cloud spanner API.
      */
     static final String EXPERIMENTAL_HOST="cloudspanner.experimentalhost";    
+    /**
+     * Use bypass or not.
+     */
+    static final String BYPASS="cloudspanner.bypass";
   }
 
   private static int fieldCount;
@@ -211,6 +215,7 @@ public class CloudSpannerClient extends DB {
       String project = properties.getProperty(CloudSpannerProperties.PROJECT);
       String instance = properties.getProperty(CloudSpannerProperties.INSTANCE, "ycsb-instance");
       String database = properties.getProperty(CloudSpannerProperties.DATABASE, "ycsb-database");
+      boolean bypass = Boolean.parseBoolean(properties.getProperty(CloudSpannerProperties.BYPASS));
 
       fieldCount = Integer.parseInt(properties.getProperty(
           CoreWorkload.FIELD_COUNT_PROPERTY, CoreWorkload.FIELD_COUNT_PROPERTY_DEFAULT));
@@ -228,9 +233,12 @@ public class CloudSpannerClient extends DB {
         if (project == null) {
           project = spanner.getOptions().getProjectId();
         }
-        // dbClient = spanner.getDatabaseClient(DatabaseId.of(project, instance, database));
-        dbClient = new experimental.users.romaroma.boxjni.SpannerJNI(
+        if (bypass) {
+          dbClient = new experimental.users.romaroma.boxjni.SpannerJNI(
             DatabaseId.of(project, instance, database).toString());
+        } else {
+          dbClient = spanner.getDatabaseClient(DatabaseId.of(project, instance, database));
+        }
       } catch (Exception e) {
         LOGGER.log(Level.SEVERE, "init()", e);
         throw new DBException(e);
