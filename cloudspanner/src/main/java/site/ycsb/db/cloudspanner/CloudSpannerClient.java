@@ -114,6 +114,8 @@ public class CloudSpannerClient extends DB {
     static final String EXPERIMENTAL_HOST="cloudspanner.experimentalhost";    
 
     static final String MAX_COMMIT_DELAY="cloudspanner.maxcommitdelay";
+
+    static final String USING_LIMIT_QUERY="cloudspanner.limit1";
   }
 
   private static int fieldCount;
@@ -125,6 +127,8 @@ public class CloudSpannerClient extends DB {
   private static TimestampBound timestampBound;
 
   private static int maxCommitDelay;
+
+  private static Boolean usingLimitQuery;
 
   private static String standardQuery;
 
@@ -155,6 +159,14 @@ public class CloudSpannerClient extends DB {
                                                       CoreWorkload.FIELD_NAME_PREFIX_DEFAULT);
     standardQuery = new StringBuilder()
         .append("SELECT * FROM ").append(table).append(" WHERE y_id=@key").toString();
+
+    usingLimitQuery = Boolean.parseBoolean(properties.getProperty(CloudSpannerProperties.USING_LIMIT_QUERY));
+    if (usingLimitQuery) {
+      standardQuery = new StringBuilder()
+        .append("SELECT y_id, field0, field1, field2, field3, field4, field5, field6, field7, field8, field9 FROM ")
+        .append(table).append(" WHERE y_id=@key LIMIT 1").toString();
+    }
+
     standardScan = new StringBuilder()
         .append("SELECT * FROM ").append(table).append(" WHERE y_id>=@startKey LIMIT @count").toString();
     for (int i = 0; i < fieldCount; i++) {
@@ -251,6 +263,7 @@ public class CloudSpannerClient extends DB {
           .append("\nBatching inserts: ").append(batchInserts)
           .append("\nBounded staleness seconds: ").append(boundedStalenessSeconds)
           .append("\nMax commit delay: ").append(maxCommitDelay)
+          .append("\nUsing limit query: ").append(usingLimitQuery)
           .toString());
     }
   }
