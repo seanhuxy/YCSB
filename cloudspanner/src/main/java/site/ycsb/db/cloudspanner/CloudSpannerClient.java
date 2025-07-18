@@ -42,6 +42,7 @@ import site.ycsb.Status;
 import site.ycsb.StringByteIterator;
 import site.ycsb.workloads.CoreWorkload;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -111,6 +112,8 @@ public class CloudSpannerClient extends DB {
      * Connect to Experimental host instead of cloud spanner API.
      */
     static final String EXPERIMENTAL_HOST="cloudspanner.experimentalhost";    
+
+    static final String MAX_COMMIT_DELAY="cloudspanner.maxcommitdelay";
   }
 
   private static int fieldCount;
@@ -120,6 +123,8 @@ public class CloudSpannerClient extends DB {
   private static int batchInserts;
 
   private static TimestampBound timestampBound;
+
+  private static int maxCommitDelay;
 
   private static String standardQuery;
 
@@ -223,6 +228,9 @@ public class CloudSpannerClient extends DB {
       timestampBound = (boundedStalenessSeconds <= 0) ?
           TimestampBound.strong() : TimestampBound.ofMaxStaleness(boundedStalenessSeconds, TimeUnit.SECONDS);
 
+      maxCommitDelay = Integer.parseInt(properties.getProperty(
+          CloudSpannerProperties.MAX_COMMIT_DELAY, "-1"));
+
       try {
         spanner = getSpanner(properties, host, project);
         if (project == null) {
@@ -242,6 +250,7 @@ public class CloudSpannerClient extends DB {
           .append("\nUsing queries for reads: ").append(queriesForReads)
           .append("\nBatching inserts: ").append(batchInserts)
           .append("\nBounded staleness seconds: ").append(boundedStalenessSeconds)
+          .append("\nMax commit delay: ").append(maxCommitDelay)
           .toString());
     }
   }
@@ -356,7 +365,12 @@ public class CloudSpannerClient extends DB {
       m.set(e.getKey()).to(e.getValue().toString());
     }
     try {
-      dbClient.writeAtLeastOnce(Arrays.asList(m.build()));
+      if (maxCommitDelay != -1) {
+        dbClient.writeAtLeastOnceWithOptions(Arrays.asList(m.build()),
+            Options.maxCommitDelay(Duration.ofMillis(maxCommitDelay)));
+      } else {
+        dbClient.writeAtLeastOnce(Arrays.asList(m.build()));
+      }
     } catch (Exception e) {
       LOGGER.log(Level.INFO, "update()", e);
       return Status.ERROR;
