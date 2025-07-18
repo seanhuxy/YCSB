@@ -127,7 +127,7 @@ public class CloudSpannerClient extends DB {
 
   private static final ArrayList<String> STANDARD_FIELDS = new ArrayList<>();
 
-  private static final String PRIMARY_KEY_COLUMN = "id";
+  private static final String PRIMARY_KEY_COLUMN = "y_id";
 
   private static final Logger LOGGER = Logger.getLogger(CloudSpannerClient.class.getName());
 
@@ -149,9 +149,9 @@ public class CloudSpannerClient extends DB {
     final String fieldprefix = properties.getProperty(CoreWorkload.FIELD_NAME_PREFIX,
                                                       CoreWorkload.FIELD_NAME_PREFIX_DEFAULT);
     standardQuery = new StringBuilder()
-        .append("SELECT * FROM ").append(table).append(" WHERE id=@key").toString();
+        .append("SELECT * FROM ").append(table).append(" WHERE y_id=@key").toString();
     standardScan = new StringBuilder()
-        .append("SELECT * FROM ").append(table).append(" WHERE id>=@startKey LIMIT @count").toString();
+        .append("SELECT * FROM ").append(table).append(" WHERE y_id>=@startKey LIMIT @count").toString();
     for (int i = 0; i < fieldCount; i++) {
       STANDARD_FIELDS.add(fieldprefix + i);
     }
@@ -258,7 +258,7 @@ public class CloudSpannerClient extends DB {
           .append(joiner.join(fields))
           .append(" FROM ")
           .append(table)
-          .append(" WHERE id=@key")
+          .append(" WHERE y_id=@key")
           .bind("key").to(key)
           .build();
     }
@@ -306,7 +306,7 @@ public class CloudSpannerClient extends DB {
           .append(joiner.join(fields))
           .append(" FROM ")
           .append(table)
-          .append(" WHERE id>=@startKey LIMIT @count")
+          .append(" WHERE y_id>=@startKey LIMIT @count")
           .bind("startKey").to(startKey)
           .bind("count").to(recordCount)
           .build();
