@@ -394,11 +394,9 @@ public class CassandraCQLClient extends DB {
         StringBuilder scanStmt = new StringBuilder();
         scanStmt.append(initialStmt.substring(0, initialStmt.length() - 1));
         scanStmt.append(" WHERE ");
-        scanStmt.append(QueryBuilder.token(YCSB_KEY));
+        scanStmt.append(YCSB_KEY);
         scanStmt.append(" >= ");
-        scanStmt.append("token(");
-        scanStmt.append(QueryBuilder.bindMarker());
-        scanStmt.append(")");
+        scanStmt.append("?");
         scanStmt.append(" LIMIT ");
         scanStmt.append(QueryBuilder.bindMarker());
 
